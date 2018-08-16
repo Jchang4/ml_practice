@@ -5,17 +5,17 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 
 
-train_data = pd.read_pickle('./data/train.pickle')
+train_data = pd.read_pickle('./data/train_data.pickle')
 X_train = train_data.loc[:, train_data.columns != 'label']
-Y_train = train_data['label']
+Y_train = pd.read_pickle('./data/train_labels.pickle')
 
-valid_data = pd.read_pickle('./data/valid.pickle')
+valid_data = pd.read_pickle('./data/valid_data.pickle')
 X_valid = valid_data.loc[:, valid_data.columns != 'label']
-Y_valid = valid_data['label']
+Y_valid = pd.read_pickle('./data/valid_labels.pickle')
 
-test_data = pd.read_pickle('./data/test.pickle')
+test_data = pd.read_pickle('./data/test_data.pickle')
 X_test = test_data.loc[:, test_data.columns != 'label']
-Y_test = test_data['label']
+Y_test = pd.read_pickle('./data/test_labels.pickle')
 
 model = Sequential()
 model.add(Dense(785*2, activation='relu', input_dim=X_train.shape[1]))
@@ -38,12 +38,12 @@ print('Test: ', score)
 
 
 # Submission
-submit_data = pd.read_csv('./data/test.csv')
-submission = model.predict(submit_data.values)
-submission = np.argmax(submission, axis=1)
-
-df = pd.DataFrame({
-    'Label': submission,
-})
-df.index += 1
-df.to_csv('./data/submission.csv', index_label='ImageId')
+# submit_data = pd.read_csv('./data/test.csv')
+# submission = model.predict(submit_data.values)
+# submission = np.argmax(submission, axis=1)
+#
+# df = pd.DataFrame({
+#     'Label': submission,
+# })
+# df.index += 1
+# df.to_csv('./data/submission.csv', index_label='ImageId')
