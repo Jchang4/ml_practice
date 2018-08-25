@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import pandas as pd;
 
 df = pd.read_csv('./data/iris.csv')
+df.Species = pd.Categorical(df.Species)
+df['Species_codes'] = df.Species.cat.codes
 
 print(df.head())
 
-xlabel = 'SepalLengthCm'
-ylabel = 'SepalWidthCm'
-
-plt.scatter(df[xlabel], df[ylabel])
-plt.xlabel(xlabel)
-plt.ylabel(ylabel)
+plt.scatter('PetalLengthCm', 'PetalWidthCm', c='Species_codes', data=df)
+# plt.xlabel(xlabel)
+# plt.ylabel(ylabel)
 plt.show()
 
 # SepalLengthCm  SepalWidthCm

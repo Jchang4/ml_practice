@@ -1,27 +1,39 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 
 
 df = pd.read_csv('./data/train.csv')
 
-survived = df[df['Survived'] == 1]
-died = df[df['Survived'] == 0]
-
-x1 = survived['Embarked']
-y1 = survived['Age']
-
-x2 = died['Embarked']
-y2 = died['Age']
+survived = df.Survived
 
 
-plt.subplot(211)
-plt.plot(x1, y1, 'bo',
-        x2, y2, 'rx')
-plt.xlabel('Count')
-plt.ylabel('Age')
+print(df.head())
+# print(df.columns)
+# print(df.groupby('Pclass').count())
+
+
+[
+'Pclass',
+'Sex',
+'Age',
+'SibSp',
+'Parch',
+'Ticket',
+'Fare',
+'Cabin',
+'Embarked'
+]
+
+idx = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+bar_width = 0.3
+
+# plt.subplot(211)
+plt.bar(df[survived == 1].Age.unique(),
+        df[survived == 1].groupby('Age').count().Survived,
+        color='b', label='Survived', width=bar_width)
+plt.bar(df[survived == 0].Age.unique() + bar_width,
+        df[survived == 0].groupby('Age').count().Survived,
+        color='r', label='Died', width=bar_width)
 plt.show()
-
-
-print(df.info())
-print(df.groupby(['Embarked']))
