@@ -12,8 +12,6 @@ from keras.utils import plot_model
 X_train = np.load('./data/train_data.pickle.npy')
 Y_train = np.load('./data/train_labels.pickle.npy')
 
-
-# valid_data = pd.read_pickle('./data/valid_data.pickle')
 X_valid = np.load('./data/valid_data.pickle.npy')
 Y_valid = np.load('./data/valid_labels.pickle.npy')
 
