@@ -12,7 +12,8 @@ STYLE_IMAGE_PATH = './data/van-gogh.jpg'
 
 
 def load_image(path_to_img):
-    return load_img(path_to_img, target_size=(224, 224))
+    img = load_img(path_to_img, target_size=(224, 224))
+    return kp_image.img_to_array(img)
 
 # def load_img(path_to_img):
 #     max_dim = 512
@@ -30,7 +31,7 @@ def load_image(path_to_img):
 
 def imshow(path_to_img, title=None):
     # Remove the batch dimension
-    img = load_img(path_to_img, target_size=(224, 224))
+    img = load_image(path_to_img)
     # Normalize for display
     if title is not None:
         plt.title(title)
