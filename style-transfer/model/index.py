@@ -1,7 +1,10 @@
-import tensorflow as tf
 import keras
+import tensorflow as tf
+import numpy as np
 from keras.models import Model
 from keras.applications.vgg19 import VGG19
+from tensorflow.python.keras.preprocessing import image as kp_image
+from keras.preprocessing.image import load_img
 
 DEFAULT_CONTENT_LAYERS = ['block5_conv2']
 DEFAULT_STYLE_LAYERS = [('block1_conv1', 0.2),
@@ -9,6 +12,12 @@ DEFAULT_STYLE_LAYERS = [('block1_conv1', 0.2),
                         ('block3_conv1', 0.2),
                         ('block4_conv1', 0.2),
                         ('block5_conv1', 0.2)]
+class CONFIG:
+    IMAGE_WIDTH = 224
+    IMAGE_HEIGHT = 224
+    COLOR_CHANNELS = 3
+    NOISE_RATIO = 0.6
+    MEANS = np.array([123.68, 116.779, 103.939]).reshape((1,1,1,3))
 
 
 # def get_model(content_layers=DEFAULT_CONTENT_LAYERS, style_layers=DEFAULT_STYLE_LAYERS):
@@ -96,19 +105,81 @@ def compute_style_cost(model, STYLE_LAYERS = DEFAULT_STYLE_LAYERS):
     for layer_name, coeff in STYLE_LAYERS:
         # Select the output tensor of the currently selected layer
         out = model[layer_name]
+        # Set a_S to be the hidden layer activation from the layer
+        # we have selected, by running the session on out
+        a_S = sess.run(out)
+        # Set a_G to be the hidden layer activation from same layer.
+        # Here, a_G references model[layer_name] and isn't evaluated yet.
+        # Later in the code, we'll assign the image G as the model input,
+        # so that when we run the session, this will be the activations
+        # drawn from the appropriate layer, with G as input.
+        a_G = out
+        # Compute style_cost for the current layer
+        J_style_layer = compute_style_cost_for_layer(a_S, a_G)
+        J_style += coeff * J_style_layer
+
+    return J_style
+
+# Combination of Content and Style Cost
+def total_cost(J_content, J_style, alpha = 10, beta = 40):
+    """
+    Computes the total cost function
+
+    Arguments:
+    J_content -- content cost coded above
+    J_style -- style cost coded above
+    alpha -- hyperparameter weighting the importance of the content cost
+    beta -- hyperparameter weighting the importance of the style cost
+
+    Returns:
+    J -- total cost as defined by the formula above.
+    """
+    J = alpha * J_content + beta * J_style
+    return J
 
 
-# def get_style_loss(base, target):
-#     """
-#         Style Loss = Sum ()
-#     """
-#     n_H, n_W, n_C = base.get_shape().as_list()
-#     GBase = gram_matrix(base)
-#     loss_sum = tf.reduce_mean(tf.square(GBase - target))
-#     return 1/(4 * n_C**2 * (n_H * n_W)**2) * loss_sum
-#
-#
-# def get_loss(content_base, content_target, style_base, style_loss):
-#     J_content = get_content_loss(content_base, content_target)
-#     J_style = get_style_loss(style_base, style_loss)
-#     return J_content + J_style
+def reshape_and_normalize_image(image):
+    """
+    Reshape and normalize the input image (content or style)
+    """
+
+    # Reshape image to mach expected input of VGG16
+    image = np.reshape(image, ((1,) + image.shape))
+
+    # Substract the mean to match the expected input of VGG16
+    image = image - CONFIG.MEANS
+
+    return image
+
+def save_image(path, image):
+
+    # Un-normalize the image so that it looks good
+    image = image + CONFIG.MEANS
+
+    # Clip and Save the image
+    image = np.clip(image[0], 0, 255).astype('uint8')
+    scipy.misc.imsave(path, image)
+
+
+def generate_noise_image(content_image, noise_ratio = CONFIG.NOISE_RATIO):
+    """
+    Generates a noisy image by adding random noise to the content_image
+    """
+
+    # Generate a random noise_image
+    noise_image = np.random.uniform(-20, 20, (1, CONFIG.IMAGE_HEIGHT, CONFIG.IMAGE_WIDTH, CONFIG.COLOR_CHANNELS)).astype('float32')
+
+    # Set the input_image to be a weighted average of the content_image and a noise_image
+    input_image = noise_image * noise_ratio + content_image * (1 - noise_ratio)
+
+    return input_image
+
+def load_image(path_to_img):
+    return load_img(path_to_img, target_size=(224, 224))
+
+def load_and_process_img(path_to_img):
+  img = load_image(path_to_img)
+  img = kp_image.img_to_array(img)
+  img = tf.keras.applications.vgg19.preprocess_input(img)
+  img = np.expand_dims(img, axis=0)
+  return img

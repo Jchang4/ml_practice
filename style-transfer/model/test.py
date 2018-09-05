@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 from index import *
 
@@ -48,7 +49,20 @@ def test_compute_style_cost_for_layer():
         print("Should be: 9.19028\n")
 
 
+def test_total_cost():
+    tf.reset_default_graph()
+
+    with tf.Session() as test:
+        np.random.seed(3)
+        J_content = np.random.randn()
+        J_style = np.random.randn()
+        J = total_cost(J_content, J_style)
+        print("J =        " + str(J))
+        print("Should be: 35.34667875478276\n")
+
+
 if __name__ == '__main__':
     test_compute_content_cost()
     test_gram_matrix()
     test_compute_style_cost_for_layer()
+    test_total_cost()
