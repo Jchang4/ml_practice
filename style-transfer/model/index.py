@@ -27,7 +27,7 @@ DEFAULT_STYLE_LAYERS = [('block1_conv1', 0.2),
 
 
 # Content Loss
-def get_content_cost(a_C, a_G):
+def compute_content_cost(a_C, a_G):
     """
     Computes the content cost
 
@@ -58,7 +58,7 @@ def gram_matrix(A):
     """
     return tf.matmul(A, tf.transpose(A))
 
-def get_style_cost(a_S, a_G):
+def compute_style_cost_for_layer(a_S, a_G):
     """
     Arguments:
     a_S -- tensor of dimension (1, n_H, n_W, n_C), hidden layer activations representing style of the image S
@@ -73,10 +73,29 @@ def get_style_cost(a_S, a_G):
     a_G = tf.reshape(tf.transpose(a_G), [n_C, n_H * n_W])
 
     GS = gram_matrix(a_S)
-    GA = gram_matrix(a_G)
+    GG = gram_matrix(a_G)
 
-    cost_sum = tf.reduce_sum(tf.square(GS - GA))
+    cost_sum = tf.reduce_sum(tf.square(GS - GG))
     return 1 / (4 * (n_C**2) * (n_H * n_W)**2) * cost_sum
+
+def compute_style_cost(model, STYLE_LAYERS = DEFAULT_STYLE_LAYERS):
+    """
+    Computes the overall style cost from several chosen layers
+
+    Arguments:
+    model -- our tensorflow model
+    STYLE_LAYERS -- A python list containing:
+                        - the names of the layers we would like to extract style from
+                        - a coefficient for each of them
+
+    Returns:
+    J_style -- tensor representing a scalar value, style cost defined above by equation (2)
+    """
+    J_style = 0
+
+    for layer_name, coeff in STYLE_LAYERS:
+        # Select the output tensor of the currently selected layer
+        out = model[layer_name]
 
 
 # def get_style_loss(base, target):
