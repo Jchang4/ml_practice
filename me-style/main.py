@@ -6,7 +6,7 @@ from helpers.model import compute_content_cost, compute_style_cost
 from helpers.model import total_cost
 
 
-# Get Images
+""" Get Images """
 content_path = './data/turtle.png'
 style_path = './data/van-gogh.jpg'
 
@@ -15,14 +15,16 @@ style_image = get_image(style_path)
 generated_image = generate_random_image()
 
 
-# Get VGG Model
+""" Get VGG Model """
 model = get_vgg_model()
 pred = model.predict(content_image)
 
-# Setup Tensorflow
+
+""" Setup Tensorflow """
 sess = tf.Session()
 
-# Get Activations and initial Cost, J
+
+""" Get Activations and initial Cost, J """
 a_C = 0
 a_S = 0
 a_G = 0
