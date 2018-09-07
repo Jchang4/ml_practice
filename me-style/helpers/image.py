@@ -20,7 +20,8 @@ def get_image(path_to_img, show = False):
 
     img = image.img_to_array(img)
     img = np.expand_dims(img, axis=0)
-    return preprocess_input(img)
+    img = preprocess_input(img)
+    return img
 
 # Display and Save Images
 def show_image(image, title = ''):
