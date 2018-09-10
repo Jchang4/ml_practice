@@ -95,6 +95,8 @@ def nst_model(sess, model, input_img, content_img, style_img,
         input_img = tf.clip_by_value(input_img, min_vals, max_vals)
         # input_img = K.clip(input_img, 0., 255.)
 
+        print('Finished Iteration: ' + str(i))
+
         # Print and Save Image every 20 interations
         if i % 10 == 0:
             Jt, Jc, Js = sess.run([J, J_content, J_style])
@@ -108,3 +110,4 @@ def nst_model(sess, model, input_img, content_img, style_img,
             start_fn = time.time()
 
     save_image('./images/nst-final.jpg', sess.run(input_img)[0])
+    print('Saved final image! Check out: images/nst-final.jpg')

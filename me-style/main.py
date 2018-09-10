@@ -9,9 +9,6 @@ from config import CONFIG
 tf.reset_default_graph()
 
 with tf.Session() as sess:
-
-# sess = tf.Session()
-
     """ Get Images """
     content_path = './data/seal.jpeg'
     style_path = './data/cubism-1.jpg'
@@ -25,6 +22,3 @@ with tf.Session() as sess:
 
     """ Train the Model! """
     nst_model(sess, model, generated_img, content_img, style_img)
-
-
-    # sess.close()

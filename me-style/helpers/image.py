@@ -41,6 +41,19 @@ def generate_noise_image(path_to_content_img, noise_ratio = 0.6, show = True):
     input_image = vgg19_preprocess(input_image)
     return input_image
 
+def generate_noise_image2(content_image, noise_ratio = 0.6, show = True):
+    """
+    Generates a noisy image by adding random noise to the content_image
+    """
+    # Generate a random noise_image
+    noise_image = np.random.uniform(-20, 20, EXPECTED_IMAGE_SIZE).astype('float32')
+    # Set the input_image to be a weighted average of the content_image and a noise_image
+    input_image = noise_image * noise_ratio + content_image * (1 - noise_ratio)
+    if show:
+        show_image(input_image, 'Generated Image')
+    input_image = vgg19_preprocess(input_image)
+    return input_image
+
 def deprocess_img(img):
     x = img.copy()
 
