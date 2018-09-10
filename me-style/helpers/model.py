@@ -77,7 +77,7 @@ def nst_model(sess, model, input_img, content_img, style_img,
     J = total_cost(J_content, J_style)
 
     grads = compute_gradient(J, input_img)
-    optimizer = tf.train.AdamOptimizer(1.)
+    optimizer = tf.train.AdamOptimizer(0.1)
     # train_step = optimizer.minimize(J)
     train_step = optimizer.apply_gradients([(grads, input_img)])
 
@@ -104,7 +104,7 @@ def nst_model(sess, model, input_img, content_img, style_img,
             print('Style Cost:  ', Js)
             save_image('./images/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
             end_fn = time.time()
-            print('Total time:', end_fn - start_fn, '\n')
+            print('Total time:  ', end_fn - start_fn, '\n')
             start_fn = time.time()
 
     save_image('./images/nst-final.jpg', sess.run(input_img)[0])
