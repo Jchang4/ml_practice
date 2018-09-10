@@ -75,13 +75,13 @@ def nst_model(sess, model, input_img, content_img, style_img,
     J_style = compute_style_cost(a_S, a_G[1:])
     J = total_cost(J_content, J_style)
 
-    optimizer = tf.train.AdamOptimizer(2.)
     grads = compute_gradient(J, input_img)[0]
-    train_step = optimizer.apply_gradients([(grads, input_img)])
+    # optimizer = tf.train.AdamOptimizer(2.)
+    # train_step = optimizer.apply_gradients([(grads, input_img)])
 
-    # norm_means = np.array([103.939, 116.779, 123.68])
-    # min_vals = -norm_means
-    # max_vals = 255 - norm_means
+    norm_means = np.array([103.939, 116.779, 123.68])
+    min_vals = -norm_means
+    max_vals = 255 - norm_means
 
     sess.run(tf.global_variables_initializer())
 
@@ -89,17 +89,20 @@ def nst_model(sess, model, input_img, content_img, style_img,
         curr_grads = sess.run(grads)
 
         step_size_scaled = 10. / (np.std(curr_grads) + 1.0e-8)
+        # step_size_scaled = 1.
 
         input_img = input_img - curr_grads * step_size_scaled
 
-        input_img = tf.clip_by_value(input_img, 0., 255.)
+        input_img = tf.clip_by_value(input_img, min_vals, max_vals)
+        # input_img = K.clip(input_img, 0., 255.)
 
         # Print and Save Image every 20 interations
         if i % 10 == 0:
             Jt, Jc, Js = sess.run([J, J_content, J_style])
+            print('Adding image:', 'nst-{}.jpg'.format(str(i)))
             print('Total Cost:  ', Jt)
             print('Content Cost:', Jc)
             print('Style Cost:  ', Js, '\n')
-            save_image('./images/cli/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
+            save_image('./images/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
 
-    save_image('./images/cli/nst-final.jpg', sess.run(input_img)[0])
+    save_image('./images/nst-final.jpg', sess.run(input_img)[0])
