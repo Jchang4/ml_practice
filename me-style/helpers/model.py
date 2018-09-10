@@ -51,15 +51,16 @@ def compute_style_cost(style_activations, generated_activations):
     for i,(layer_name,coeff) in enumerate(CONFIG.STYLE_LAYERS):
         a_S = style_activations[i]
         a_G = generated_activations[i]
-        J_style += coeff * compute_style_cost_layer(a_S, a_G)
+        J_curr = coeff * compute_style_cost_layer(a_S, a_G)
+        J_style = J_style + J_curr
     return J_style
 
 def total_cost(J_content, J_style, alpha = 10, beta = 40):
     return alpha * J_content + beta * J_style
 
 """ Compute Gradient """
-def compute_gradient(loss, img):
-    return K.gradients(loss, img)
+def compute_gradient(loss, input_img):
+    return K.gradients(loss, input_img)
 
 
 """ NST Model """
@@ -74,25 +75,27 @@ def nst_model(sess, model, input_img, content_img, style_img,
     J_style = compute_style_cost(a_S, a_G[1:])
     J = total_cost(J_content, J_style)
 
-    optimizer = tf.train.AdamOptimizer(0.01)
+    optimizer = tf.train.AdamOptimizer(2.)
     grads = compute_gradient(J, input_img)[0]
     train_step = optimizer.apply_gradients([(grads, input_img)])
-    # train_step = optimizer.minimize(J)
 
-    norm_means = np.array([103.939, 116.779, 123.68])
-    min_vals = -norm_means
-    max_vals = 255 - norm_means
+    # norm_means = np.array([103.939, 116.779, 123.68])
+    # min_vals = -norm_means
+    # max_vals = 255 - norm_means
 
     sess.run(tf.global_variables_initializer())
 
     for i in range(num_iterations):
-        sess.run(train_step)
+        curr_grads = sess.run(grads)
 
-        clipped = tf.clip_by_value(input_img, min_vals, max_vals)
-        input_img.assign(clipped)
+        step_size_scaled = 10. / (np.std(curr_grads) + 1.0e-8)
+
+        input_img = input_img - curr_grads * step_size_scaled
+
+        input_img = tf.clip_by_value(input_img, 0., 255.)
 
         # Print and Save Image every 20 interations
-        if i % 20 == 0:
+        if i % 10 == 0:
             Jt, Jc, Js = sess.run([J, J_content, J_style])
             print('Total Cost:  ', Jt)
             print('Content Cost:', Jc)

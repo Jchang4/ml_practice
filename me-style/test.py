@@ -8,6 +8,7 @@ from config import CONFIG
 # Reset the graph
 tf.reset_default_graph()
 
+sess = tf.Session()
 
 """ Get Images """
 content_path = './data/coffee.jpeg'
@@ -20,7 +21,8 @@ generated_img = tf.Variable(generate_noise_image(content_path, show=False), name
 """ Setup Model and Initial Costs """
 model = get_model()
 
-sess = tf.Session()
-
 """ Train the Model! """
 nst_model(sess, model, generated_img, content_img, style_img)
+
+
+sess.close()
