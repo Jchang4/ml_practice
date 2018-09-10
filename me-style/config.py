@@ -7,7 +7,7 @@ class CONFIG:
     NUM_CHANNELS = 3
 
     # Layers for Cost Function
-    CONTENT_LAYER = ['block5_conv2']
+    CONTENT_LAYERS = ['block5_conv2']
     STYLE_LAYERS = [('block1_conv1', 0.2),
                     ('block2_conv1', 0.2),
                     ('block3_conv1', 0.2),
