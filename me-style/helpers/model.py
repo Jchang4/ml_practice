@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import time
 
 import keras.backend as K
 from keras.models import Model
@@ -60,12 +61,12 @@ def total_cost(J_content, J_style, alpha = 10, beta = 40):
 
 """ Compute Gradient """
 def compute_gradient(loss, input_img):
-    return K.gradients(loss, input_img)
+    return K.gradients(loss, input_img)[0]
 
 
 """ NST Model """
 def nst_model(sess, model, input_img, content_img, style_img,
-                num_iterations = 200, alpha = 0.01):
+                num_iterations = 200):
     a_C = model(content_img)[0]
     a_S = model(style_img)[1:]
     a_G = model(input_img)
@@ -75,9 +76,10 @@ def nst_model(sess, model, input_img, content_img, style_img,
     J_style = compute_style_cost(a_S, a_G[1:])
     J = total_cost(J_content, J_style)
 
-    grads = compute_gradient(J, input_img)[0]
-    # optimizer = tf.train.AdamOptimizer(2.)
-    # train_step = optimizer.apply_gradients([(grads, input_img)])
+    grads = compute_gradient(J, input_img)
+    optimizer = tf.train.AdamOptimizer(1.)
+    # train_step = optimizer.minimize(J)
+    train_step = optimizer.apply_gradients([(grads, input_img)])
 
     norm_means = np.array([103.939, 116.779, 123.68])
     min_vals = -norm_means
@@ -85,13 +87,10 @@ def nst_model(sess, model, input_img, content_img, style_img,
 
     sess.run(tf.global_variables_initializer())
 
+    start_fn = time.time()
+
     for i in range(num_iterations):
-        curr_grads = sess.run(grads)
-
-        step_size_scaled = 10. / (np.std(curr_grads) + 1.0e-8)
-        # step_size_scaled = 1.
-
-        input_img = input_img - curr_grads * step_size_scaled
+        sess.run(train_step)
 
         input_img = tf.clip_by_value(input_img, min_vals, max_vals)
         # input_img = K.clip(input_img, 0., 255.)
@@ -102,7 +101,10 @@ def nst_model(sess, model, input_img, content_img, style_img,
             print('Adding image:', 'nst-{}.jpg'.format(str(i)))
             print('Total Cost:  ', Jt)
             print('Content Cost:', Jc)
-            print('Style Cost:  ', Js, '\n')
+            print('Style Cost:  ', Js)
             save_image('./images/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
+            end_fn = time.time()
+            print('Total time:', end_fn - start_fn, '\n')
+            start_fn = time.time()
 
     save_image('./images/nst-final.jpg', sess.run(input_img)[0])
