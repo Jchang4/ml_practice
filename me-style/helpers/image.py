@@ -58,8 +58,9 @@ def deprocess_img(img):
     x = x[:, :, ::-1]
 
     # Ensure we're in the range of (0, 255)
-    x = np.clip(x, 0., 255.).astype('uint8')
+    x = np.clip(x, 0, 255).astype('uint8')
     return x
 
 def save_image(path_to_save, img):
-    pass
+    img = deprocess_img(img)
+    save_img(path_to_save, img)
