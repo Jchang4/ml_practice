@@ -13,7 +13,7 @@ from config import CONFIG
 def get_model():
     vgg = VGG19(include_top=False, weights='imagenet',
                 input_shape=(CONFIG.HEIGHT, CONFIG.WIDTH, CONFIG.NUM_CHANNELS))
-    vgg.trainable = False
+    # vgg.trainable = False
 
     content_layers = [vgg.get_layer(layer_name).output for layer_name in CONFIG.CONTENT_LAYERS]
     style_layers = [vgg.get_layer(layer_name).output for layer_name,coeff in CONFIG.STYLE_LAYERS]
@@ -66,7 +66,7 @@ def compute_gradient(loss, input_img):
 
 """ NST Model """
 def nst_model(sess, model, input_img, content_img, style_img,
-                num_iterations = 200):
+                num_iterations = 200, save_dir = './images'):
     a_C = model(content_img)[0]
     a_S = model(style_img)[1:]
     a_G = model(input_img)
@@ -77,7 +77,7 @@ def nst_model(sess, model, input_img, content_img, style_img,
     J = total_cost(J_content, J_style)
 
     grads = compute_gradient(J, input_img)
-    optimizer = tf.train.AdamOptimizer(0.1)
+    optimizer = tf.train.AdamOptimizer(1.5)
     # train_step = optimizer.minimize(J)
     train_step = optimizer.apply_gradients([(grads, input_img)])
 
@@ -92,8 +92,8 @@ def nst_model(sess, model, input_img, content_img, style_img,
     for i in range(num_iterations):
         sess.run(train_step)
 
-        input_img = tf.clip_by_value(input_img, min_vals, max_vals)
-        # input_img = K.clip(input_img, 0., 255.)
+        input_img = tf.clip_by_value(input_img, min_vals, max_vals) # clip by averages so the mean stays centered
+        # input_img = K.clip(input_img, 0., 255.) # clip by absolute pixel values
 
         print('Finished Iteration: ' + str(i))
 
@@ -104,10 +104,10 @@ def nst_model(sess, model, input_img, content_img, style_img,
             print('Total Cost:  ', Jt)
             print('Content Cost:', Jc)
             print('Style Cost:  ', Js)
-            save_image('./images/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
+            save_image(save_dir + '/nst-{}.jpg'.format(str(i)), sess.run(input_img)[0])
             end_fn = time.time()
             print('Total time:  ', end_fn - start_fn, '\n')
             start_fn = time.time()
 
-    save_image('./images/nst-final.jpg', sess.run(input_img)[0])
+    save_image(save_dir + '/nst-final.jpg', sess.run(input_img)[0])
     print('Saved final image! Check out: images/nst-final.jpg')
