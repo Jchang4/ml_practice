@@ -2,8 +2,8 @@
 
 class CONFIG:
     # Image
-    HEIGHT = 512
-    WIDTH = 512
+    HEIGHT = 300
+    WIDTH = 400
     NUM_CHANNELS = 3
 
     # Layers for Cost Function
