@@ -15,7 +15,7 @@ def vgg19_preprocess(img):
     img = np.expand_dims(img, axis=0)
     return preprocess_input(img)
 
-def get_image(path_to_img, expected_img_size = (200, 200, 3), show = False, title = ''):
+def get_image(path_to_img, expected_img_size, show = False, title = ''):
     x = load_img(path_to_img, target_size=expected_img_size)
     if show:
         show_image(x, title)

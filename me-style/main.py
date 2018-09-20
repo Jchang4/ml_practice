@@ -6,8 +6,6 @@ from helpers.model import get_model, nst_model
 
 tfe = tf.contrib.eager
 
-tf.enable_eager_execution()
-
 class CONFIG:
     # Image
     HEIGHT = 300
@@ -26,6 +24,8 @@ class CONFIG:
 
 IMAGE_SIZE = (CONFIG.HEIGHT, CONFIG.WIDTH, CONFIG.NUM_CHANNELS)
 
+tf.enable_eager_execution()
+
 # Get Images
 content_path = './data/content/crazy-giuliani.jpeg'
 style_path = './data/style/psychadelic-1.jpg'
@@ -35,14 +35,13 @@ style_img = get_image(style_path, IMAGE_SIZE, show=False, title='Style Image')
 generated_img = generate_noise_image(content_path, IMAGE_SIZE, show=False)
 
 # Turn images into Tensorflow Constants and Variables
-content_img = tf.constant(content_img, name='content_img', dtype=tf.float32)
-style_img = tf.constant(style_img, name='style_img', dtype=tf.float32)
-generated_img = tfe.Variable(generated_img, name='generated_img', dtype=tf.float32)
+content_img = tf.constant(content_img, name='content_img', dtype='float32')
+style_img = tf.constant(style_img, name='style_img', dtype='float32')
+generated_img = tfe.Variable(generated_img, name='generated_img', dtype='float32')
 
 # Setup Model and Initial Costs
 model = get_model(IMAGE_SIZE, CONFIG.CONTENT_LAYERS, CONFIG.STYLE_LAYERS)
 
 # Train the Model!
 nst_model(model, generated_img, content_img, style_img, CONFIG.STYLE_LAYERS,
-            save_dir='./images/main',
-            alpha = 10, beta = 40)
+            save_dir='./images/test', alpha = 10, beta = 40)

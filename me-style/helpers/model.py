@@ -2,18 +2,17 @@ import tensorflow as tf
 import numpy as np
 import time
 
-import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import vgg19
+from tensorflow.keras.applications.vgg19 import VGG19
 from helpers.image import save_image
 
 def get_model(expected_img_size, content_layers, style_layers):
     if len(expected_img_size) != 3:
         raise Exception('Image size must be 3: height, width, and num. of channels')
     
-    vgg = vgg19.VGG19(include_top=False, 
-                    weights='imagenet',
-                    input_shape=expected_img_size)
+    vgg = VGG19(include_top=False, 
+                weights='imagenet',
+                input_shape=expected_img_size)
     vgg.trainable = False
 
     content_layers = [vgg.get_layer(layer_name).output for layer_name in content_layers]
@@ -52,8 +51,7 @@ def compute_style_cost(style_activations, generated_activations, style_layers):
     for i,(layer_name,coeff) in enumerate(style_layers):
         a_S = style_activations[i]
         a_G = generated_activations[i]
-        J_curr = coeff * compute_style_cost_layer(a_S, a_G)
-        J_style = J_style + J_curr
+        J_style += coeff * compute_style_cost_layer(a_S, a_G)
     return J_style
 
 def total_cost(J_content, J_style, alpha, beta):
@@ -62,10 +60,10 @@ def total_cost(J_content, J_style, alpha, beta):
 """ Compute Gradient """
 def compute_gradient(model, input_img, content_img, style_img,
                     style_layers, alpha, beta):
-    with tf.GradientTape() as tape:
+    with tf.GradientTape(persistent=True) as tape:
         a_C = model(content_img)[0]
         a_S = model(style_img)[1:]
-        a_G = model(generated_img)
+        a_G = model(input_img)
         J_content = compute_content_cost(a_C, a_G[0])
         J_style = compute_style_cost(a_S, a_G[1:], style_layers)
         J_total = total_cost(J_content, J_style, alpha, beta)
@@ -84,8 +82,8 @@ def nst_model(model, input_img, content_img, style_img, style_layers,
     start_time = abs_start_time
 
     for i in range(num_iterations):
-        grads, J_total, J_content, J_style = compute_gradient(content_img, style_img, input_img, model, 
-                                                            style_layers, alpha, beta)
+        grads, J_total, J_content, J_style = compute_gradient(model, input_img, content_img, style_img,
+                                                                style_layers, alpha, beta)
         optimizer.apply_gradients([(grads, input_img)])
         # input_img = tf.clip_by_value(input_img, min_vals, max_vals)
 
@@ -93,10 +91,11 @@ def nst_model(model, input_img, content_img, style_img, style_layers,
         if i % 10 == 0:
             end_time = time.time()
             print('Adding image:', 'nst-{}.jpg'.format(str(i)))
-            print('Total Cost:  ', Jt)
-            print('Content Cost:', Jc)
-            print('Style Cost:  ', Js)
-            save_image('{}/{}.jpeg'.format(save_dir, str(i)), input_img.numpy()[0])
+            print('Total Cost:  ', J_total.numpy())
+            print('Content Cost:', J_content.numpy())
+            print('Style Cost:  ', J_style.numpy())
+            save_img_path = '{}/{}.jpeg'.format(save_dir, str(i))
+            save_image(save_img_path, input_img.numpy()[0])
             print('Total time:  ', end_time - start_time, '\n')
             start_fn = time.time()
 
