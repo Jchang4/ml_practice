@@ -1,12 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 
-from keras.preprocessing.image import load_img, img_to_array, save_img
-from keras.applications.vgg19 import preprocess_input
-
-from config import CONFIG
-
-EXPECTED_IMAGE_SIZE = (CONFIG.HEIGHT, CONFIG.WIDTH, CONFIG.NUM_CHANNELS)
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.applications.vgg19 import preprocess_input
 
 def show_image(img, title = ''):
     plt.imshow(img)
@@ -18,22 +15,22 @@ def vgg19_preprocess(img):
     img = np.expand_dims(img, axis=0)
     return preprocess_input(img)
 
-def get_image(path_to_img, show = False, title = ''):
-    x = load_img(path_to_img, target_size=EXPECTED_IMAGE_SIZE)
+def get_image(path_to_img, expected_img_size = (200, 200, 3), show = False, title = ''):
+    x = load_img(path_to_img, target_size=expected_img_size)
     if show:
         show_image(x, title)
-    x = img_to_array(x)
+    x = img_to_array(x).astype('float32')
     x = vgg19_preprocess(x)
     return x
 
-def generate_noise_image(path_to_content_img, noise_ratio = 0.6, show = True):
+def generate_noise_image(path_to_content_img, expected_img_size, noise_ratio = 0.6, show = True):
     """
     Generates a noisy image by adding random noise to the content_image
     """
-    content_image = load_img(path_to_content_img, target_size=EXPECTED_IMAGE_SIZE)
+    content_image = load_img(path_to_content_img, target_size=expected_img_size)
     content_image = img_to_array(content_image)
     # Generate a random noise_image
-    noise_image = np.random.uniform(-20, 20, EXPECTED_IMAGE_SIZE).astype('float32')
+    noise_image = np.random.uniform(-20, 20, expected_img_size).astype('float32')
     # Set the input_image to be a weighted average of the content_image and a noise_image
     input_image = noise_image * noise_ratio + content_image * (1 - noise_ratio)
     if show:
@@ -41,12 +38,12 @@ def generate_noise_image(path_to_content_img, noise_ratio = 0.6, show = True):
     input_image = vgg19_preprocess(input_image)
     return input_image
 
-def generate_noise_image2(content_image, noise_ratio = 0.6, show = True):
+def generate_noise_image2(content_image, expected_img_size, noise_ratio = 0.6, show = True):
     """
     Generates a noisy image by adding random noise to the content_image
     """
     # Generate a random noise_image
-    noise_image = np.random.uniform(-20, 20, EXPECTED_IMAGE_SIZE).astype('float32')
+    noise_image = np.random.uniform(-20, 20, expected_img_size).astype('float32')
     # Set the input_image to be a weighted average of the content_image and a noise_image
     input_image = noise_image * noise_ratio + content_image * (1 - noise_ratio)
     if show:
@@ -76,4 +73,6 @@ def deprocess_img(img):
 
 def save_image(path_to_save, img):
     img = deprocess_img(img)
-    save_img(path_to_save, img)
+    img = Image.fromarray(img)
+    img.save(path_to_save, "JPEG")
+    
