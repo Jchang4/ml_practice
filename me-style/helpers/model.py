@@ -90,14 +90,14 @@ def nst_model(model, input_img, content_img, style_img, style_layers,
         # Print and Save Image every 10 interations
         if i % 10 == 0:
             end_time = time.time()
-            print('Adding image:', 'nst-{}.jpg'.format(str(i)))
+            print('Adding image:', '{}.jpg'.format(str(i)))
             print('Total Cost:  ', J_total.numpy())
             print('Content Cost:', J_content.numpy())
             print('Style Cost:  ', J_style.numpy())
             save_img_path = '{}/{}.jpeg'.format(save_dir, str(i))
             save_image(save_img_path, input_img.numpy()[0])
             print('Total time:  ', end_time - start_time, '\n')
-            start_fn = time.time()
+            start_time = time.time()
 
-    print('Total time to train: {}'.format(time.time() - start_time))
+    print('Total time to train: {}'.format(time.time() - abs_start_time))
     save_image('{}/final.jpeg'.format(save_dir), input_img.numpy()[0])
