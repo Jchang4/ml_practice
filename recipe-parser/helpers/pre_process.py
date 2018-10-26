@@ -6,15 +6,13 @@ def remove_stop_words(input_col):
     stop_words = set(stopwords.words("english"))
     
     def remove(sentence):
-        if not sentence:
-            return None
         words = word_tokenize(sentence)
         meaningful_words = [str(w)\
             if w not in stop_words else ''\
             for w in words]
         return ' '.join(meaningful_words)
     
-    return input_col.map(remove)
+    return input_col.map(remove, na_action='ignore')
 
 def get_processed_data():
     file_path = './data/nyt-ingredients-snapshot-2015.csv'

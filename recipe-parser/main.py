@@ -16,5 +16,7 @@ df = pre_process.get_processed_data()
 
 
 # df['comment'] = df.comment.map(lambda x: x.upper() if x else None)
-for i in range(5):
-    print(df.iloc[i])
+# for i in range(5):
+#     print(df.iloc[i])
+
+print(df.describe())
