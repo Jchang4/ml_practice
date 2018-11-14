@@ -4,6 +4,7 @@
     - Create Word Mapping (word to index)
 """
 import pickle
+import numpy as np
 
 def preprocess(max_char_length=140):
     text = open('./data/alice.txt', 'r').read()
@@ -28,12 +29,20 @@ def preprocess(max_char_length=140):
         
         # Tokenize characters - i.e. return list of idxs instead of characters        
         tokenized_chars = [char_to_idx[c] if c != -1 else -1 for c in curr_chars]
-        tokenized_text.append(tokenized_chars)
+        tokenized_text.append(np.array(tokenized_chars))
+    
+    tokenized_text = np.array(tokenized_text)
     
     return tokenized_text, char_to_idx
 
+def get_X_and_Y(X):
+    """ Y is X shifted over 1 time-step """
+    Y = np.roll(X, -1)
+    return X, Y
 
 if __name__ == '__main__':
     tokenized_text, char_to_idx = preprocess()
+    X, Y = get_X_and_Y(tokenized_text)
 
     pickle.dump([tokenized_text, char_to_idx], open('./data/processed-alice.pickle', 'wb'))
+    pickle.dump([X, Y], open('./data/alice-x-y-data.pickle', 'wb'))
