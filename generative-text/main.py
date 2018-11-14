@@ -13,5 +13,6 @@ if __name__ == '__main__':
     tokenized_text, char_to_idx = pickle.load(open('./data/processed-alice.pickle', 'rb'))
     X, Y = pickle.load(open('./data/alice-x-y-data.pickle', 'rb'))
 
-
     model = get_model()
+    model.compile()
+    model.fit(X, Y)
