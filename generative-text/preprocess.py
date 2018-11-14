@@ -11,7 +11,9 @@ def preprocess(max_char_length=140):
     text = text.lower()
 
     # Create Word Mapping
-    chars = sorted(list(set(text)))
+    chars = set(text)
+    chars.add('PAD')
+    chars = sorted(list(chars))
     char_to_idx = dict((c,i) for i,c in enumerate(chars))
 
     # Break text into sentences
@@ -25,10 +27,15 @@ def preprocess(max_char_length=140):
         if len(curr_chars) > max_char_length:
             curr_chars = curr_chars[:max_char_length]
         elif len(curr_chars) < max_char_length:
-            curr_chars = curr_chars + ([-1] * (max_char_length - len(curr_chars)))
+            curr_chars = curr_chars + (['PAD'] * (max_char_length - len(curr_chars)))
         
-        # Tokenize characters - i.e. return list of idxs instead of characters        
-        tokenized_chars = [char_to_idx[c] if c != -1 else -1 for c in curr_chars]
+        # Tokenize characters - i.e. return list of idxs instead of characters
+        tokenized_chars = []
+        for c in curr_chars:
+            one_hot = [0] * len(chars)
+            idx = char_to_idx[c]
+            one_hot[idx] = 1
+            tokenized_chars.append(np.array(one_hot))
         tokenized_text.append(np.array(tokenized_chars))
     
     tokenized_text = np.array(tokenized_text)
