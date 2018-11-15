@@ -1,18 +1,19 @@
 import pickle
+import pandas as pd
 from keras.models import Model
 from keras.layers import Input, LSTM, Dense
 
-def get_model(max_char_length=140):
+vocab = list('abcdefghijklmnopqrstuvwxyz!?.')
+char_to_idx = dict((c,i) for i,c in enumerate(vocab))
+idx_to_char = dict((str(i),c) for i,c in enumerate(vocab))
 
-    X_input = Input((max_char_length,))
-    X = LSTM()(X_input)
+tokenized_text, char_to_idx, idx_to_char = pickle.load(open('./data/processed-alice.pickle', 'rb'))
 
-    return Model(X_input, out)
+print(tokenized_text[0][5])
 
-if __name__ == '__main__':
-    tokenized_text, char_to_idx = pickle.load(open('./data/processed-alice.pickle', 'rb'))
-    X, Y = pickle.load(open('./data/alice-x-y-data.pickle', 'rb'))
+# def get_model():
+#     x0 = Input(shape=())
+#     a0
+#     c0
 
-    model = get_model()
-    model.compile()
-    model.fit(X, Y)
+#     return Model(inputs, outputs)
