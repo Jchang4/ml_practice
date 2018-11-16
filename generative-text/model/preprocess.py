@@ -20,12 +20,21 @@ for i in range(0, len(alice) - max_sequence_length):
     dataX.append([char_to_idx[c] for c in seq_in])
     dataY.append(char_to_idx[seq_out])
 
-# Convert data to the shape: [samples, timesteps, features]
+# Convert data to the shape: [samples, timesteps, features] and normalize
 # And change dataY to be one-hot encoded
 num_samples = len(dataX)
 X = np.reshape(dataX, (num_samples, max_sequence_length, 1))
+X = X / float(len(unique_chars))
 Y = to_categorical(dataY, num_classes=len(unique_chars))
 
 
 # Save X, Y, char_to_idx, idx_to_char
-pickle.dump([X, Y, char_to_idx, idx_to_char], open('./data/processed-alice.pickle', 'wb'))
+processed_input = {
+    'X': X,
+    'Y': Y,
+    'dataX': dataX,
+    'dataY': dataY,
+    'char_to_idx': char_to_idx,
+    'idx_to_char': idx_to_char,
+}
+pickle.dump(processed_input, open('./data/processed-alice.pickle', 'wb'))
