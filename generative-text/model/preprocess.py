@@ -21,7 +21,7 @@ def preprocess_text(text, save_path, max_sequence_length = 140):
     for i in range(0, len(text) - max_sequence_length):
         curr_text = text[i:i+max_sequence_length]
         seq_in = [char_to_idx[c] for c in curr_text]
-        seq_out = text[i+max_sequence_length]
+        seq_out = char_to_idx[text[i+max_sequence_length]]
         dataX.append(seq_in)
         dataY.append(seq_out)
 
@@ -41,7 +41,7 @@ def preprocess_text(text, save_path, max_sequence_length = 140):
         'char_to_idx': char_to_idx,
         'idx_to_char': idx_to_char,
     }
-    pickle.dumps(processed, open(save_path, 'wb'))
+    pickle.dump(processed, open(save_path, 'wb'))
 
 
 

@@ -15,5 +15,5 @@ for path in book_paths:
     combined_len = combined_len + len(txt)
     combined_text = combined_text + ' ' + txt
 
-preprocess_text(combined_text, '../data/fitzgerald/processed-all-books.pickle')
+preprocess_text(combined_text, './data/fitzgerald/processed-all-books.pickle')
 
