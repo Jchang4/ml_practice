@@ -12,6 +12,7 @@ def get_char_mapping(s):
 
 def preprocess_text(text, save_path, max_sequence_length = 140):
     text = text.lower()
+    text = text.replace('\n', '')
 
     char_to_idx, idx_to_char = get_char_mapping(text)
 
